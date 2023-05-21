@@ -1,3 +1,9 @@
+settings/bot_config.py
+settings/common.py
+settings/db_config.py
+settings/github_config.py
+settings/gpt_config.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
