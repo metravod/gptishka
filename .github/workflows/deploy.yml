@@ -34,5 +34,4 @@ jobs:
         PORT: ${{ secrets.VPS_PORT }}
         PASSWORD: ${{ secrets.SSH_PASS }}
         script: |
-          cd ~/projects/gptishka
-          docker-compose up -d
+          docker run -d metravod/gptishka:latest
