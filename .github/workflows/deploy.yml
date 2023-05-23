@@ -18,6 +18,7 @@ jobs:
         script: |
           cd ~/projects/gptishka 
           git pull
+          alembic upgrade head
           docker build -t metravod/gptishka:latest .
           
 
