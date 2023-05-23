@@ -74,6 +74,13 @@ def get_list_contexts_by_user(tg_id) -> list:
     return [context.name for context in user.contexts]
 
 
+def update_count_tokens_in_context(tg_id, name, count_tokens: int):
+    session = _create_session()
+    user = get_user(tg_id)
+    session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name).update({'tokens': count_tokens})
+    session.commit()
+
+
 def delete_user_context(tg_id, name_context):
     session = _create_session()
     context = _get_context(tg_id, name_context)

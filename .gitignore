@@ -3,6 +3,7 @@ settings/common.py
 settings/db_config.py
 settings/github_config.py
 settings/gpt_config.py
+alembic.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -67,7 +67,7 @@ async def chating(message: types.Message, state: FSMContext):
         orm.add_message(user_id, chat.name, msg)
         context.append(forming_message('user', message.text))
 
-        answer = GPTConnector(context).run()
+        answer, tokens = GPTConnector(context).run()
 
         gpt_msg = forming_message('assistant', answer)
         orm.add_message(user_id, chat.name, gpt_msg)
