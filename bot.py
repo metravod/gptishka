@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 
 from gpt_connector import GPTConnector
 from settings.bot_config import bot_token
-from settings.common import base_context, forming_message
+from settings.common import base_context, forming_message, context_full
 from database import orm
 
 bot = Bot(token=bot_token)
@@ -50,7 +50,6 @@ async def start_new_chat(message: types.Message):
 
 @dp.message_handler(state=BaseChat.content)
 async def chating(message: types.Message, state: FSMContext):
-    print('go >>> ', state)
     await state.update_data(content=message.text)
     user_id = message.from_user.id
     chat = orm.get_active_context(user_id)
@@ -68,6 +67,8 @@ async def chating(message: types.Message, state: FSMContext):
         context.append(forming_message('user', message.text))
 
         answer, tokens = GPTConnector(context).run()
+        if tokens > 3700:
+            '\n\n'.join([answer, context_full])
 
         orm.update_count_tokens_in_context(user_id, chat.name, tokens)
         gpt_msg = forming_message('assistant', answer)
