@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 
 from gpt_connector import GPTConnector
 from settings.bot_config import bot_token
-from settings.common import base_context, forming_message, context_full
+from settings.common import base_context, forming_message, message_context_full
 from database import orm
 
 bot = Bot(token=bot_token)
@@ -50,36 +50,52 @@ async def start_new_chat(message: types.Message):
 
 @dp.message_handler(state=BaseChat.content)
 async def chating(message: types.Message, state: FSMContext):
+
+    # Получаем сообщение, определяем юзера и чат
     await state.update_data(content=message.text)
     user_id = message.from_user.id
     chat = orm.get_active_context(user_id)
 
+    # Если в текущем контексте больше 4090 токенов (ограничение API),
+    # то мы его деактивируем, потому что работать он больше уже не будет
+    if chat.tokens > 4090:
+        orm.disactive_context(user_id, chat.name)
+        chat = None
+
+    # Если активный чат не найден, то создаём новый и делаем активным его
     if chat is None:
         orm.add_context(message.from_user.id, 'test', 1, True)
         orm.add_message(user_id, 'test', base_context)
         chat = orm.get_active_context(user_id)
 
-    if message.text != 'exit':
-        context = orm.get_talk(user_id, chat.name)
-
-        msg = forming_message('user', message.text)
-        orm.add_message(user_id, chat.name, msg)
-        context.append(forming_message('user', message.text))
-
-        answer, tokens = GPTConnector(context).run()
-        if tokens > 3700:
-            '\n\n'.join([answer, context_full])
-
-        orm.update_count_tokens_in_context(user_id, chat.name, tokens)
-        gpt_msg = forming_message('assistant', answer)
-        orm.add_message(user_id, chat.name, gpt_msg)
-
-        await message.answer(answer)
-        await state.finish()
-        await BaseChat.content.set()
-    else:
+    # На случай необходимости прекратить беседу
+    if message.text == 'exit':
         await message.answer('Пока!')
         await state.finish()
+
+    # Тащим весь контекст
+    context = orm.get_talk(user_id, chat.name)
+
+    # Собираем сообщение и добавляем его в беседу
+    msg = forming_message('user', message.text)
+    orm.add_message(user_id, chat.name, msg)
+    context.append(forming_message('user', message.text))
+
+    # Скармливаем контекст gpt
+    try:
+        answer, tokens = GPTConnector(context).run()
+    except:
+        await message.answer(message_context_full)
+        await state.finish()
+
+    # Добавляем ответ к контексту и сохраняем
+    orm.update_count_tokens_in_context(user_id, chat.name, tokens)
+    gpt_msg = forming_message('assistant', answer)
+    orm.add_message(user_id, chat.name, gpt_msg)
+
+    await message.answer(answer)
+    await state.finish()
+    await BaseChat.content.set()
 
 
 if __name__ == '__main__':
