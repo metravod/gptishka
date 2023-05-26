@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, User, UserContext, MessageFromContext
+from database.models import Base, User, UserContext
 
 from settings.db_config import postgre_url
 
@@ -85,4 +85,12 @@ def delete_user_context(tg_id, name_context):
     session = _create_session()
     context = _get_context(tg_id, name_context)
     session.delete(context)
+    session.commit()
+
+
+def save_context(tg_id, name, content):
+    session = _create_session()
+    user = get_user(tg_id)
+    new_context = UserContext(owner=user.id, name=name, content=content)
+    session.add(new_context)
     session.commit()
