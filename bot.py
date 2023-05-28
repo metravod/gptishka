@@ -24,6 +24,10 @@ class CustomContext(StatesGroup):
     content = State()
 
 
+class DecissionChat(StatesGroup):
+    content = State()
+
+
 @dp.message_handler(commands=['start'])
 async def start_message(message: types.Message):
     orm.add_user(message.from_user.id)
@@ -66,27 +70,44 @@ async def start_new_chat(message: types.Message):
 async def chating(message: types.Message, state: FSMContext):
     await state.update_data(content=message.text)
     user_id = message.from_user.id
-    chat = cli.get(user_id)
-    chat.append(forming_message('user', message.text))
-    print(chat)
-    answer, tokens = GPTConnector(chat).run()
 
-    chat.append(forming_message('assistant', message.text))
-    cli.set(user_id, chat)
+    if message.text == 'Завершить чат':
+        markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
+        btn1 = types.KeyboardButton('Сохранить')
+        btn2 = types.KeyboardButton('Удалить')
+        markup.add(btn1, btn2)
+        await message.answer('Сохранить текущую беседу или удалить?', reply_markup=markup)
+        await DecissionChat.content.set()
 
-    markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
-    btn1 = types.KeyboardButton('Завершить чат')
-    markup.add(btn1)
+    else:
+        chat = cli.get(user_id)
+        chat.append(forming_message('user', message.text))
+        print(chat)
+        answer, tokens = GPTConnector(chat).run()
 
-    await message.answer(answer, reply_markup=markup)
-    await state.finish()
-    await Chat.content.set()
+        chat.append(forming_message('assistant', message.text))
+        cli.set(user_id, chat)
+
+        markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
+        btn1 = types.KeyboardButton('Завершить чат')
+        markup.add(btn1)
+
+        await message.answer(answer, reply_markup=markup)
+        await state.finish()
+        await Chat.content.set()
 
 
-@dp.message_handler(regexp='Завершить чат')
+@dp.message_handler(regexp='Сохранить')
 async def chating(message: types.Message):
     chat = cli.get(message.from_user.id)
     orm.save_context(message.from_user.id, 'test', chat)
+    cli.delete(message.from_user.id)
+    await message.answer('Готово, можешь начать новый диалог')
+
+
+@dp.message_handler(regexp='Удалить')
+async def chating(message: types.Message):
+    cli.delete(message.from_user.id)
     await message.answer('Готово, можешь начать новый диалог')
 
 
