@@ -104,21 +104,17 @@ async def chating(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=DecissionChat.content)
 async def chating(message: types.Message, state: FSMContext):
-    print(f'> go go delete')
     chat = cli.get(message.from_user.id)
-    print('Пытаюсь сохранить чат')
     orm.save_context(message.from_user.id, 'test', chat)
-    print('Сохранил, пытаюсь удалить')
     cli.delete(message.from_user.id)
-    print('Удалил')
+    await state.finish()
     await message.answer('Готово, можешь начать новый диалог')
 
 
 @dp.message_handler(state=DecissionChat.content)
 async def chating(message: types.Message, state: FSMContext):
-    print('Пытаюсь удалить')
     cli.delete(message.from_user.id)
-    print('Удалил')
+    await state.finish()
     await message.answer('Готово, можешь начать новый диалог')
 
 
