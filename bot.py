@@ -68,6 +68,7 @@ async def start_new_chat(message: types.Message):
 
 @dp.message_handler(state=Chat.content)
 async def chating(message: types.Message, state: FSMContext):
+    print(f'!!! >>> {message.text}')
     await state.update_data(content=message.text)
     user_id = message.from_user.id
 
@@ -77,12 +78,16 @@ async def chating(message: types.Message, state: FSMContext):
         btn2 = types.KeyboardButton('Удалить')
         markup.add(btn1, btn2)
         await message.answer('Сохранить текущую беседу или удалить?', reply_markup=markup)
+        await state.finish()
         await DecissionChat.content.set()
 
     else:
         chat = cli.get(user_id)
+        print(f'from redis >>> {chat}')
+        chat = [chat] if isinstance(chat, dict) else chat
+        print(f'after listing >>> {chat}')
         chat.append(forming_message('user', message.text))
-        print(chat)
+        print(f' after append {chat}')
         answer, tokens = GPTConnector(chat).run()
 
         chat.append(forming_message('assistant', message.text))
@@ -97,17 +102,23 @@ async def chating(message: types.Message, state: FSMContext):
         await Chat.content.set()
 
 
-@dp.message_handler(regexp='Сохранить')
-async def chating(message: types.Message):
+@dp.message_handler(state=DecissionChat.content)
+async def chating(message: types.Message, state: FSMContext):
+    print(f'> go go delete')
     chat = cli.get(message.from_user.id)
+    print('Пытаюсь сохранить чат')
     orm.save_context(message.from_user.id, 'test', chat)
+    print('Сохранил, пытаюсь удалить')
     cli.delete(message.from_user.id)
+    print('Удалил')
     await message.answer('Готово, можешь начать новый диалог')
 
 
-@dp.message_handler(regexp='Удалить')
-async def chating(message: types.Message):
+@dp.message_handler(state=DecissionChat.content)
+async def chating(message: types.Message, state: FSMContext):
+    print('Пытаюсь удалить')
     cli.delete(message.from_user.id)
+    print('Удалил')
     await message.answer('Готово, можешь начать новый диалог')
 
 
