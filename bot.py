@@ -8,6 +8,7 @@ from redis_helper import RedisHelper
 from settings.bot_config import bot_token
 from settings.common import base_context, forming_message
 from database import orm
+from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT
 
 bot = Bot(token=bot_token)
 storage = MemoryStorage()
@@ -26,13 +27,6 @@ class CustomContext(StatesGroup):
 
 class DecissionChat(StatesGroup):
     content = State()
-
-
-MAIN_MENU = types.reply_keyboard.ReplyKeyboardMarkup(row_width=2)
-btn1 = types.KeyboardButton('Новый чат - базовый контекст')
-btn2 = types.KeyboardButton('Новый чат - свой контекст')
-btn3 = types.KeyboardButton('Список сохранённых чатов')
-MAIN_MENU.add(btn1, btn2, btn3)
 
 
 @dp.message_handler(commands=['start'])
@@ -59,13 +53,13 @@ async def custom_context(message: types.Message):
 async def new_base_chat(message: types.Message, state: FSMContext):
     await state.update_data(content=message.text)
     cli.set(message.from_user.id, forming_message('system', message.text))
-    await message.answer('Погнали')
+    await message.answer('Погнали', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
 @dp.message_handler(regexp='Список сохранённых чатов')
 async def start_new_chat(message: types.Message):
-    ...
+    await message.answer('Я так пока не умею (', reply_markup=MAIN_MENU)
 
 
 @dp.message_handler(state=Chat.content)
@@ -75,11 +69,7 @@ async def chating(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
 
     if message.text == 'Завершить чат':
-        markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
-        btn1 = types.KeyboardButton('Сохранить')
-        btn2 = types.KeyboardButton('Удалить')
-        markup.add(btn1, btn2)
-        await message.answer('Сохранить текущую беседу или удалить?', reply_markup=markup)
+        await message.answer('Сохранить текущую беседу или удалить?', reply_markup=ENDED_CHAT)
         await state.finish()
         await DecissionChat.content.set()
 
@@ -95,11 +85,7 @@ async def chating(message: types.Message, state: FSMContext):
         chat.append(forming_message('assistant', message.text))
         cli.set(user_id, chat)
 
-        markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
-        btn1 = types.KeyboardButton('Завершить чат')
-        markup.add(btn1)
-
-        await message.answer(answer, reply_markup=markup)
+        await message.answer(answer, reply_markup=END_CHAT)
         await state.finish()
         await Chat.content.set()
 
