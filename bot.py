@@ -28,16 +28,18 @@ class DecissionChat(StatesGroup):
     content = State()
 
 
+MAIN_MENU = types.reply_keyboard.ReplyKeyboardMarkup(row_width=2)
+btn1 = types.KeyboardButton('Новый чат - базовый контекст')
+btn2 = types.KeyboardButton('Новый чат - свой контекст')
+btn3 = types.KeyboardButton('Список сохранённых чатов')
+MAIN_MENU.add(btn1, btn2, btn3)
+
+
 @dp.message_handler(commands=['start'])
 async def start_message(message: types.Message):
     orm.add_user(message.from_user.id)
-    markup = types.reply_keyboard.ReplyKeyboardMarkup(row_width=2)
-    btn1 = types.KeyboardButton('Новый чат - базовый контекст')
-    btn2 = types.KeyboardButton('Новый чат - свой контекст')
-    btn3 = types.KeyboardButton('Список сохранённых чатов')
-    markup.add(btn1, btn2, btn3)
     text = f'Привет {message.from_user.first_name}, я бот, который поможет тебе взаимодействовать с ChatGPT'
-    await message.answer(text, reply_markup=markup)
+    await message.answer(text, reply_markup=MAIN_MENU)
 
 
 @dp.message_handler(regexp='Новый чат - базовый контекст')
@@ -108,14 +110,14 @@ async def chating(message: types.Message, state: FSMContext):
     orm.save_context(message.from_user.id, 'test', chat)
     cli.delete(message.from_user.id)
     await state.finish()
-    await message.answer('Готово, можешь начать новый диалог')
+    await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
 
 
 @dp.message_handler(state=DecissionChat.content)
 async def chating(message: types.Message, state: FSMContext):
     cli.delete(message.from_user.id)
     await state.finish()
-    await message.answer('Готово, можешь начать новый диалог')
+    await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
 
 
 if __name__ == '__main__':
