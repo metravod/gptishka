@@ -78,7 +78,7 @@ async def choose_chat(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     chat = orm.get_context(callback_query.from_user.id, callback_query.data)
     cli.set(callback_query.from_user.id, chat.content)
-    await bot.send_message(callback_query.from_user.id, f'Погнали!')
+    await bot.send_message(callback_query.from_user.id, f'Погнали!', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
