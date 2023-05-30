@@ -20,7 +20,6 @@ jobs:
           git pull
           alembic upgrade head
           docker build -t metravod/gptishka:latest .
-          docker rmi -f $(docker images -f 'dangling=true' -q)
           
 
   deploy:
@@ -39,3 +38,4 @@ jobs:
           docker stop gptishka 
           docker rm gptishka
           docker run --name gptishka -d metravod/gptishka:latest
+          docker rmi -f $(docker images -f 'dangling=true' -q)
