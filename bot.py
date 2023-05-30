@@ -111,19 +111,17 @@ async def chating(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=DecissionChat.content)
-async def chating(message: types.Message, state: FSMContext):
-    chat = cli.get(message.from_user.id)
-    orm.save_context(message.from_user.id, 'test', chat)
-    cli.delete(message.from_user.id)
-    await state.finish()
-    await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
-
-
-@dp.message_handler(state=DecissionChat.content)
-async def chating(message: types.Message, state: FSMContext):
-    cli.delete(message.from_user.id)
-    await state.finish()
-    await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
+async def decission_end_context(message: types.Message, state: FSMContext):
+    if message.text == 'Сохранить':
+        chat = cli.get(message.from_user.id)
+        orm.save_context(message.from_user.id, 'test', chat)
+        cli.delete(message.from_user.id)
+        await state.finish()
+        await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
+    elif message.text == 'Удалить':
+        cli.delete(message.from_user.id)
+        await state.finish()
+        await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
 
 
 if __name__ == '__main__':
