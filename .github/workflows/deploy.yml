@@ -35,4 +35,4 @@ jobs:
         PORT: ${{ secrets.VPS_PORT }}
         PASSWORD: ${{ secrets.SSH_PASS }}
         script: |
-          docker run --name gptishka -d metravod/gptishka:latest
+          docker run -d metravod/gptishka:latest
