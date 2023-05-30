@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -8,13 +10,20 @@ from redis_helper import RedisHelper
 from settings.bot_config import bot_token
 from settings.common import base_context, forming_message
 from database import orm
-from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT
+from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, forming_inline_lists
 
 bot = Bot(token=bot_token)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 cli = RedisHelper()
+
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 class Chat(StatesGroup):
@@ -59,7 +68,18 @@ async def new_base_chat(message: types.Message, state: FSMContext):
 
 @dp.message_handler(regexp='Список сохранённых чатов')
 async def start_new_chat(message: types.Message):
-    await message.answer('Я так пока не умею (', reply_markup=MAIN_MENU)
+    contexts = orm.get_list_contexts_by_user(message.from_user.id)
+    markup = forming_inline_lists(contexts)
+    await message.answer('Вот список твоих контекстов', reply_markup=markup)
+
+
+@dp.callback_query_handler()
+async def choose_chat(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    chat = orm.get_context(callback_query.from_user.id, callback_query.data)
+    cli.set(callback_query.from_user.id, chat.content)
+    await bot.send_message(callback_query.from_user.id, f'Погнали!')
+    await Chat.content.set()
 
 
 @dp.message_handler(state=Chat.content)

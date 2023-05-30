@@ -30,14 +30,14 @@ def get_user(tg_id) -> User | None:
 def add_context(tg_id, name: str, context_id: int, is_active: bool):
     session = _create_session()
     user = get_user(tg_id)
-    context = _get_context(tg_id, name)
+    context = get_context(tg_id, name)
     if context is None:
         new_context = UserContext(context_id=context_id, owner=user.id, name=name, is_active=is_active)
         session.add(new_context)
         session.commit()
 
 
-def _get_context(tg_id, name: str) -> UserContext | None:
+def get_context(tg_id, name: str) -> UserContext | None:
     session = _create_session()
     user = get_user(tg_id)
     return session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name).first()
@@ -56,16 +56,8 @@ def disactive_context(tg_id, name: str):
     session.commit()
 
 
-def add_message(tg_id: int, name_context: str, content: dict):
-    session = _create_session()
-    context = _get_context(tg_id, name_context)
-    new_message = MessageFromContext(context=context.id, message=content)
-    session.add(new_message)
-    session.commit()
-
-
 def get_talk(tg_id, name_context) -> list:
-    context = _get_context(tg_id, name_context)
+    context = get_context(tg_id, name_context)
     return [el.message for el in context.messages]
 
 
@@ -83,7 +75,7 @@ def update_count_tokens_in_context(tg_id, name, count_tokens: int):
 
 def delete_user_context(tg_id, name_context):
     session = _create_session()
-    context = _get_context(tg_id, name_context)
+    context = get_context(tg_id, name_context)
     session.delete(context)
     session.commit()
 

@@ -1,4 +1,9 @@
+from typing import List
+
 from aiogram import types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+from database.models import UserContext
 
 # Главное меню
 MAIN_MENU = types.reply_keyboard.ReplyKeyboardMarkup(row_width=2)
@@ -17,3 +22,11 @@ ENDED_CHAT.add(btn1, btn2)
 END_CHAT = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1)
 btn1 = types.KeyboardButton('Завершить чат')
 END_CHAT.add(btn1)
+
+
+# Фукнция для формирования inline клавиатуры со списком контекстов
+def forming_inline_lists(contexts: List[UserContext]) -> InlineKeyboardMarkup:
+    inline_list = InlineKeyboardMarkup()
+    for n, context in enumerate(contexts):
+        inline_list.add(InlineKeyboardButton(f'context_{n}', callback_data=context))
+    return inline_list
