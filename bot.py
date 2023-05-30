@@ -39,7 +39,7 @@ async def start_message(message: types.Message):
 @dp.message_handler(regexp='Новый чат - базовый контекст')
 async def new_base_chat(message: types.Message):
     cli.set(message.from_user.id, base_context)
-    await message.answer('Погнали')
+    await message.answer('Погнали', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
