@@ -20,6 +20,7 @@ jobs:
           git pull
           alembic upgrade head
           docker build -t metravod/gptishka:latest .
+          docker rm $(docker container ls --filter 'status=exited')
           docker rmi -f $(docker images -f 'dangling=true' -q)
           
 
@@ -36,4 +37,6 @@ jobs:
         PORT: ${{ secrets.VPS_PORT }}
         PASSWORD: ${{ secrets.SSH_PASS }}
         script: |
+          docker stop gptishka
+          docker rm gptishka
           docker run --name gptishka -d metravod/gptishka:latest
