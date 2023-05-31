@@ -70,6 +70,7 @@ async def new_base_chat(message: types.Message, state: FSMContext):
 async def get_list_contexts(message: types.Message):
     contexts = orm.get_list_contexts_by_user(message.from_user.id)
     markup = forming_inline_lists(contexts)
+    print(contexts)
     await message.answer('Вот список твоих контекстов', reply_markup=markup)
 
 
