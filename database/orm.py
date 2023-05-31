@@ -54,7 +54,7 @@ def save_context(tg_id, name, content):
     user = get_user(tg_id)
     context = get_context(tg_id, name)
     if context:
-        context.update({'content': content})
+        session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name).update({'content': content})
         session.commit()
     else:
         new_context = UserContext(owner=user.id, name=name, content=content)
