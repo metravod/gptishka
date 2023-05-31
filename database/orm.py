@@ -27,15 +27,18 @@ def get_user(tg_id) -> User | None:
     return session.query(User).filter(User.tg_id == tg_id).first()
 
 
-def get_context(tg_id, name: str) -> UserContext | None:
+def get_context(tg_id, ctx_name: str = None, ctx_id: int = None) -> UserContext | None:
     session = _create_session()
     user = get_user(tg_id)
-    return session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name).first()
+    if ctx_id:
+        return session.query(UserContext).filter(UserContext.owner == user.id, UserContext.id == ctx_id).first()
+    elif ctx_name:
+        return session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == ctx_name).first()
 
 
-def get_list_contexts_by_user(tg_id) -> list:
+def get_list_contexts_by_user(tg_id) -> dict:
     user = get_user(tg_id)
-    return [context.name for context in user.contexts]
+    return {context.id: context.name for context in user.contexts}
 
 
 def delete_user_context(tg_id, name_context):
@@ -52,7 +55,7 @@ def delete_user_context(tg_id, name_context):
 def save_context(tg_id, name, content):
     session = _create_session()
     user = get_user(tg_id)
-    context = get_context(tg_id, name)
+    context = get_context(tg_id, ctx_name=name)
     if context:
         session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name).update({'content': content})
         session.commit()

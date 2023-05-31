@@ -77,7 +77,7 @@ async def get_list_contexts(message: types.Message):
 async def choose_chat(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     await bot.answer_callback_query(callback_query.id)
-    chat = orm.get_context(user_id, callback_query.data)
+    chat = orm.get_context(user_id, ctx_id=callback_query.data)
     cli.set(user_id, chat.content)
     cli.set(f'{user_id}_active', chat.name)
     await bot.send_message(callback_query.from_user.id, f'Погнали!', reply_markup=END_CHAT)

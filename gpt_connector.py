@@ -26,5 +26,4 @@ def define_name_chat(message: str) -> str:
     chat_for_naming = context_for_naming.copy()
     chat_for_naming.append(forming_message('user', message))
     name_chat, _ = GPTConnector(chat_for_naming).run()
-    print('#####', name_chat)
     return name_chat
