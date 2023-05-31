@@ -52,7 +52,7 @@ def delete_user_context(tg_id, name_context):
 def save_context(tg_id, name, content):
     session = _create_session()
     user = get_user(tg_id)
-    context = get_context(user.id, name)
+    context = get_context(tg_id, name)
     if context:
         context.update({'content': content})
         session.commit()
