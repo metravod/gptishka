@@ -116,6 +116,7 @@ async def decission_end_context(message: types.Message, state: FSMContext):
     name_chat = cli.get(f'{user_id}_active')
     if message.text == 'Сохранить':
         chat = cli.get(user_id)
+        print('####', user_id, name_chat, chat)
         orm.save_context(user_id, name_chat, chat)
         cli.delete(user_id)
         cli.delete(f'{user_id}_active')
