@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
-from gpt_connector import GPTConnector
+from gpt_connector import GPTConnector, define_name_chat
 from redis_helper import RedisHelper
 from settings.bot_config import bot_token
 from settings.common import base_context, forming_message
@@ -67,7 +67,7 @@ async def new_base_chat(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(regexp='Список сохранённых чатов')
-async def start_new_chat(message: types.Message):
+async def get_list_contexts(message: types.Message):
     contexts = orm.get_list_contexts_by_user(message.from_user.id)
     markup = forming_inline_lists(contexts)
     await message.answer('Вот список твоих контекстов', reply_markup=markup)
@@ -75,16 +75,17 @@ async def start_new_chat(message: types.Message):
 
 @dp.callback_query_handler()
 async def choose_chat(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
     await bot.answer_callback_query(callback_query.id)
-    chat = orm.get_context(callback_query.from_user.id, callback_query.data)
-    cli.set(callback_query.from_user.id, chat.content)
+    chat = orm.get_context(user_id, callback_query.data)
+    cli.set(user_id, chat.content)
+    cli.set(f'{user_id}_active', chat.name)
     await bot.send_message(callback_query.from_user.id, f'Погнали!', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
 @dp.message_handler(state=Chat.content)
 async def chating(message: types.Message, state: FSMContext):
-    print(f'!!! >>> {message.text}')
     await state.update_data(content=message.text)
     user_id = message.from_user.id
 
@@ -94,12 +95,11 @@ async def chating(message: types.Message, state: FSMContext):
         await DecissionChat.content.set()
 
     else:
+        if cli.get(f'{user_id}_active') is None:
+            cli.set(f'{user_id}_active', define_name_chat(message.text))
         chat = cli.get(user_id)
-        print(f'from redis >>> {chat}')
         chat = [chat] if isinstance(chat, dict) else chat
-        print(f'after listing >>> {chat}')
         chat.append(forming_message('user', message.text))
-        print(f' after append {chat}')
         answer, tokens = GPTConnector(chat).run()
 
         chat.append(forming_message('assistant', message.text))
@@ -112,16 +112,21 @@ async def chating(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=DecissionChat.content)
 async def decission_end_context(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    name_chat = cli.get(f'{user_id}_active')
     if message.text == 'Сохранить':
-        chat = cli.get(message.from_user.id)
-        orm.save_context(message.from_user.id, 'test', chat)
-        cli.delete(message.from_user.id)
+        chat = cli.get(user_id)
+        orm.save_context(user_id, name_chat, chat)
+        cli.delete(user_id)
+        cli.delete(f'{user_id}_active')
         await state.finish()
-        await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
+        await message.answer('Сохранил, можешь начать новый диалог', reply_markup=MAIN_MENU)
     elif message.text == 'Удалить':
-        cli.delete(message.from_user.id)
+        cli.delete(user_id)
+        cli.delete(f'{user_id}_active')
+        orm.delete_user_context(user_id, name_chat)
         await state.finish()
-        await message.answer('Готово, можешь начать новый диалог', reply_markup=MAIN_MENU)
+        await message.answer('Удалил, можешь начать новый диалог', reply_markup=MAIN_MENU)
 
 
 if __name__ == '__main__':

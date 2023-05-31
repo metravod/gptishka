@@ -28,5 +28,5 @@ END_CHAT.add(btn1)
 def forming_inline_lists(contexts: List[UserContext]) -> InlineKeyboardMarkup:
     inline_list = InlineKeyboardMarkup()
     for n, context in enumerate(contexts):
-        inline_list.add(InlineKeyboardButton(f'context_{n}', callback_data=context))
+        inline_list.add(InlineKeyboardButton(context, callback_data=context))
     return inline_list

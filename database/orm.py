@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 
 from database.models import Base, User, UserContext
@@ -75,7 +75,9 @@ def update_count_tokens_in_context(tg_id, name, count_tokens: int):
 
 def delete_user_context(tg_id, name_context):
     session = _create_session()
-    context = get_context(tg_id, name_context)
+    user = get_user(tg_id)
+    context = session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name_context).first()
+    print('####', context, user.id, name_context)
     session.delete(context)
     session.commit()
 
