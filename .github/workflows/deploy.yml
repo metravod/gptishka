@@ -20,9 +20,6 @@ jobs:
           git pull
           alembic upgrade head
           docker build -t metravod/gptishka:latest .
-          docker stop gptishka
-          docker rm gptishka
-          docker rmi -f $(docker images -f 'dangling=true' -q)
           
 
   deploy:
