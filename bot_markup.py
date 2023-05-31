@@ -25,9 +25,8 @@ END_CHAT.add(btn1)
 
 
 # Фукнция для формирования inline клавиатуры со списком контекстов
-def forming_inline_lists(contexts: List[UserContext]) -> InlineKeyboardMarkup:
-    print('####', contexts)
+def forming_inline_lists(contexts: dict) -> InlineKeyboardMarkup:
     inline_list = InlineKeyboardMarkup()
-    for n, context in enumerate(contexts):
-        inline_list.add(InlineKeyboardButton(context, callback_data=context))
+    for ctx_id, context in contexts.items():
+        inline_list.add(InlineKeyboardButton(context, callback_data=ctx_id))
     return inline_list
