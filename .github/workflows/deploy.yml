@@ -20,6 +20,7 @@ jobs:
           git pull
           alembic upgrade head
           docker build -t metravod/gptishka:latest .
+          docker rmi -f $(docker images -f 'dangling=true' -q)
           
 
   deploy:
@@ -36,4 +37,3 @@ jobs:
         PASSWORD: ${{ secrets.SSH_PASS }}
         script: |
           docker run --name gptishka -d metravod/gptishka:latest
-          docker rmi -f $(docker images -f 'dangling=true' -q)
