@@ -77,9 +77,11 @@ def delete_user_context(tg_id, name_context):
     session = _create_session()
     user = get_user(tg_id)
     context = session.query(UserContext).filter(UserContext.owner == user.id, UserContext.name == name_context).first()
-    print('####', context, user.id, name_context)
-    session.delete(context)
-    session.commit()
+    if context:
+        session.delete(context)
+        session.commit()
+    else:
+        return None
 
 
 def save_context(tg_id, name, content):
