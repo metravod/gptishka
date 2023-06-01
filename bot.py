@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
 from gpt_connector import GPTConnector, define_name_chat
-from redis_helper import RedisHelper
+from database.redis_helper import RedisHelper
 from settings.bot_config import bot_token
 from settings.common import base_context, forming_message
 from database import orm
