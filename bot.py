@@ -1,28 +1,29 @@
+import sys
 import logging
 
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from gpt_connector import GPTConnector, define_name_chat
 from database.redis_helper import RedisHelper
-from settings.bot_config import bot_token
+from settings.bot_config import bot_token, admin_id
 from settings.common import base_context, forming_message
 from database import orm
 from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, forming_inline_lists
+from tools.message_formater import MessageFormatter
 
 bot = Bot(token=bot_token)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
+dp.middleware.setup(LoggingMiddleware())
 
 cli = RedisHelper()
 
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 
@@ -36,6 +37,11 @@ class CustomContext(StatesGroup):
 
 class DecissionChat(StatesGroup):
     content = State()
+
+
+@dp.errors_handler()
+async def error(update, err):
+    await bot.send_message(chat_id=admin_id, text=f'Там всё упало - {type(err).__name__}: {err}')
 
 
 @dp.message_handler(commands=['start'])
@@ -102,6 +108,13 @@ async def chating(message: types.Message, state: FSMContext):
         chat.append(forming_message('user', message.text))
         answer, tokens = GPTConnector(chat).run()
 
+        answer, its_a_code = MessageFormatter(answer).formating()
+        if its_a_code:
+            markup = InlineKeyboardMarkup(
+                InlineKeyboardButton('Перешли только код', callback_data='tg'),
+                InlineKeyboardButton('Засунь код в gists', callback_data='gists')
+            )
+
         chat.append(forming_message('assistant', message.text))
         cli.set(user_id, chat)
 
@@ -116,7 +129,6 @@ async def decission_end_context(message: types.Message, state: FSMContext):
     name_chat = cli.get(f'{user_id}_active')
     if message.text == 'Сохранить':
         chat = cli.get(user_id)
-        print('####', user_id, name_chat, chat)
         orm.save_context(user_id, name_chat, chat)
         cli.delete(user_id)
         cli.delete(f'{user_id}_active')

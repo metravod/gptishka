@@ -13,7 +13,7 @@ class GPTConnector:
 
     def run(self) -> Tuple[str, int]:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-16k-0613",
             api_key=GPT_API_KEY,
             messages=self._talk
         )
