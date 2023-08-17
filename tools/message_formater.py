@@ -14,14 +14,14 @@ class MessageFormatter:
         if self.its_a_code:
             self._remove_python_tag()
 
-        return self.format_msg, self.its_a_code
+        return self._input_msg, self.its_a_code
 
     def _check_of_this_is_code(self) -> None:
-        self.its_a_code = True if self._tag_python not in self._input_msg else False
+        self.its_a_code = True if self._tag_python in self._input_msg else False
 
     def _remove_python_tag(self) -> None:
         """Телега умеет в форматирование только если нет уточнения что это за язык"""
-        self.format_msg = self._input_msg.replace(self._tag_python, '```')
+        self._input_msg = self._input_msg.replace(self._tag_python, '```')
 
 
 def extracting_code(msg: str) -> str:

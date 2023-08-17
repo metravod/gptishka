@@ -6,7 +6,6 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from gpt_connector import GPTConnector, define_name_chat
 from database.redis_helper import RedisHelper
@@ -67,16 +66,19 @@ async def custom_context(message: types.Message):
 @dp.message_handler(state=CustomContext.content)
 async def new_base_chat(message: types.Message, state: FSMContext):
     await state.update_data(content=message.text)
-    cli.set(message.from_user.id, forming_message('system', message.text))
-    await message.answer('Погнали', reply_markup=END_CHAT)
+    cli.set(message.from_user.id, forming_message(role='system', text=message.text))
+    await message.answer(text='Погнали', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
 @dp.message_handler(regexp='Список сохранённых чатов')
 async def get_list_contexts(message: types.Message):
     contexts = orm.get_list_contexts_by_user(message.from_user.id)
-    markup = forming_inline_lists(contexts)
-    await message.answer('Вот список твоих контекстов', reply_markup=markup)
+    if len(contexts) > 0:
+        markup = forming_inline_lists(contexts)
+        await message.answer(text='Вот список твоих контекстов', reply_markup=markup)
+    else:
+        await message.answer('У тебя нет сохранённых контекстов')
 
 
 @dp.callback_query_handler()
@@ -85,8 +87,8 @@ async def choose_chat(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     chat = orm.get_context(user_id, ctx_id=callback_query.data)
     cli.set(user_id, chat.content)
-    cli.set(f'{user_id}_active', chat.name)
-    await bot.send_message(callback_query.from_user.id, f'Погнали!', reply_markup=END_CHAT)
+    cli.set(key=f'{user_id}_active', value=chat.name)
+    await bot.send_message(callback_query.from_user.id, text=f'Погнали!', reply_markup=END_CHAT)
     await Chat.content.set()
 
 
@@ -96,24 +98,19 @@ async def chating(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
 
     if message.text == 'Завершить чат':
-        await message.answer('Сохранить текущую беседу или удалить?', reply_markup=ENDED_CHAT)
+        await message.answer(text='Сохранить текущую беседу или удалить?', reply_markup=ENDED_CHAT)
         await state.finish()
         await DecissionChat.content.set()
 
     else:
         if cli.get(f'{user_id}_active') is None:
-            cli.set(f'{user_id}_active', define_name_chat(message.text))
+            cli.set(key=f'{user_id}_active', value=define_name_chat(message.text))
         chat = cli.get(user_id)
         chat = [chat] if isinstance(chat, dict) else chat
-        chat.append(forming_message('user', message.text))
+        chat.append(forming_message(role='user', text=message.text))
         answer, tokens = GPTConnector(chat).run()
 
         answer, its_a_code = MessageFormatter(answer).formating()
-        if its_a_code:
-            markup = InlineKeyboardMarkup(
-                InlineKeyboardButton('Перешли только код', callback_data='tg'),
-                InlineKeyboardButton('Засунь код в gists', callback_data='gists')
-            )
 
         chat.append(forming_message('assistant', message.text))
         cli.set(user_id, chat)
