@@ -19,6 +19,9 @@ jobs:
           cd ~/projects/gptishka 
           git pull
           alembic upgrade head
+          docker stop gptishka
+          docker rm $(docker container ls --filter 'status=exited')
+          docker rmi metravod/gptishka
           docker build -t metravod/gptishka:latest .
           
 
