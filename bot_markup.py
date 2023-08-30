@@ -1,27 +1,33 @@
-from typing import List
-
 from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from database.models import UserContext
-
 # Главное меню
 MAIN_MENU = types.reply_keyboard.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-btn1 = types.KeyboardButton('Новый чат - базовый контекст')
-btn2 = types.KeyboardButton('Новый чат - свой контекст')
-btn3 = types.KeyboardButton('Список сохранённых чатов')
-MAIN_MENU.add(btn1, btn2, btn3)
+new_base_chat = types.KeyboardButton('Новый чат - базовый контекст')
+new_custom_chat = types.KeyboardButton('Новый чат - свой контекст')
+show_all_my_chats = types.KeyboardButton('Список сохранённых чатов')
+MAIN_MENU.add(new_base_chat, new_custom_chat, show_all_my_chats)
 
 # Завершение чата
 ENDED_CHAT = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-btn1 = types.KeyboardButton('Сохранить')
-btn2 = types.KeyboardButton('Удалить')
-ENDED_CHAT.add(btn1, btn2)
+save_btn = types.KeyboardButton('Сохранить')
+del_btn = types.KeyboardButton('Удалить')
+ENDED_CHAT.add(save_btn, del_btn)
 
 # Завершить чат
 END_CHAT = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-btn1 = types.KeyboardButton('Завершить чат')
-END_CHAT.add(btn1)
+end_btn = types.KeyboardButton('Завершить чат')
+END_CHAT.add(end_btn)
+
+# Вытащить код
+EXTRACT_CODE = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+extract_btn = types.KeyboardButton('Вытащи код')
+EXTRACT_CODE.add(extract_btn, end_btn)
+
+# Создать gists
+CREATE_GISTS = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+create_btn = types.KeyboardButton('Создай gists')
+CREATE_GISTS.add(create_btn, create_btn)
 
 
 # Фукнция для формирования inline клавиатуры со списком контекстов

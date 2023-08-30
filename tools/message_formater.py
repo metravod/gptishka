@@ -25,7 +25,14 @@ class MessageFormatter:
 
 
 def extracting_code(msg: str) -> str:
-    find_code_regex = "\```(.*?)\```/g"
+    find_code_regex = "\```(.*?)\```"
+    msg = repr(msg).replace('\\', '$$$')
     snipets = re.findall(find_code_regex, msg)
-    full_code = reduce(lambda x, y: x + f'\n# next snipet \n' + y, snipets)
-    return full_code
+    if len(snipets) > 1:
+        snipets = reduce(lambda x, y: x + f'\n# next snipet \n' + y, snipets)
+    elif len(snipets) == 1:
+        snipets = snipets[0]
+    else:
+        snipets = 'А нет кода то'
+    snipets = snipets.replace('$$$n', '\n').replace('$$$\'', '\'')
+    return snipets

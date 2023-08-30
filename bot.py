@@ -12,8 +12,9 @@ from database.redis_helper import RedisHelper
 from settings.bot_config import bot_token, admin_id
 from settings.common import base_context, forming_message
 from database import orm
-from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, forming_inline_lists
-from tools.message_formater import MessageFormatter
+from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, EXTRACT_CODE, CREATE_GISTS, forming_inline_lists
+from tools.message_formater import MessageFormatter, extracting_code
+from tools.gist_creator import GistCreator
 
 bot = Bot(token=bot_token)
 storage = MemoryStorage()
@@ -102,6 +103,26 @@ async def chating(message: types.Message, state: FSMContext):
         await state.finish()
         await DecissionChat.content.set()
 
+    elif message.text == 'Вытащи код':
+        # Достаем из редиса последнее сообщение
+        chat = cli.get(user_id)
+        last_msg = chat[-1]
+        just_code = extracting_code(last_msg['content'])
+
+        chat.append(forming_message(role='assistant', text=just_code))
+        cli.set(user_id, chat)
+
+        await message.answer(text=just_code, reply_markup=END_CHAT)  # , reply_markup=CREATE_GISTS
+        await state.finish()
+        await Chat.content.set()
+
+    elif message.text == 'Создай gists':
+        last_msg = cli.get(user_id)[-1]
+        url = GistCreator(last_msg['content']).post()
+        await message.answer(text=url, reply_markup=END_CHAT)
+        await state.finish()
+        await Chat.content.set()
+
     else:
         if cli.get(f'{user_id}_active') is None:
             cli.set(key=f'{user_id}_active', value=define_name_chat(message.text))
@@ -112,10 +133,14 @@ async def chating(message: types.Message, state: FSMContext):
 
         answer, its_a_code = MessageFormatter(answer).formating()
 
-        chat.append(forming_message('assistant', message.text))
+        chat.append(forming_message(role='assistant', text=answer))
         cli.set(user_id, chat)
 
-        await message.answer(answer, reply_markup=END_CHAT)
+        # Для сообщений с кодом добавляем в менюшку
+        # кнопку с просьбой вернуть только код
+        markup = EXTRACT_CODE if its_a_code else END_CHAT
+
+        await message.answer(answer, reply_markup=markup)
         await state.finish()
         await Chat.content.set()
 
