@@ -112,7 +112,7 @@ async def chating(message: types.Message, state: FSMContext):
         chat.append(forming_message(role='assistant', text=just_code))
         cli.set(user_id, chat)
 
-        await message.answer(text=just_code, reply_markup=END_CHAT)  # , reply_markup=CREATE_GISTS
+        await message.answer(text=just_code, reply_markup=CREATE_GISTS)
         await state.finish()
         await Chat.content.set()
 
@@ -132,6 +132,7 @@ async def chating(message: types.Message, state: FSMContext):
         answer, tokens = GPTConnector(chat).run()
 
         answer, its_a_code = MessageFormatter(answer).formating()
+        print('>>> code??', its_a_code)
 
         chat.append(forming_message(role='assistant', text=answer))
         cli.set(user_id, chat)
