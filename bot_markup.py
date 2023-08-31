@@ -27,7 +27,7 @@ EXTRACT_CODE.add(extract_btn, end_btn)
 # Создать gists
 CREATE_GISTS = types.reply_keyboard.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 create_btn = types.KeyboardButton('Создай gists')
-CREATE_GISTS.add(create_btn, create_btn)
+CREATE_GISTS.add(create_btn, end_btn)
 
 
 # Фукнция для формирования inline клавиатуры со списком контекстов
