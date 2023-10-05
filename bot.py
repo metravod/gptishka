@@ -132,7 +132,6 @@ async def chating(message: types.Message, state: FSMContext):
         answer, tokens = GPTConnector(chat).run()
 
         answer, its_a_code = MessageFormatter(answer).formating()
-        print('>>> code??', its_a_code)
 
         chat.append(forming_message(role='assistant', text=answer))
         cli.set(user_id, chat)
