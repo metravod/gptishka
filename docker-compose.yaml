@@ -1,0 +1,6 @@
+version: '3'
+services:
+  gptishka:
+    container_name: gptishka
+    build: .
+    restart: always
