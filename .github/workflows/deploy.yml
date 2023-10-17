@@ -46,8 +46,6 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
-          docker stop gptishka
-          docker system prune -f
           docker pull metravod/gptishka:latest
           docker run --env-file ~/projects/.config/dev_env.list --name gptishka -d metravod/gptishka:latest
 
