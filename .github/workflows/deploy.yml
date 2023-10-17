@@ -47,7 +47,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           docker stop gptishka
-          docker remove $(docker ps -a -q)
+          docker system prune -f
           docker pull metravod/gptishka:latest
           docker run --env-file ~/projects/.config/dev_env.list --name gptishka -d metravod/gptishka:latest
 
@@ -61,17 +61,13 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run container
       uses: appleboy/ssh-action@master
-      env:
-        bot: ${{ secrets.BOT }}
-        admin: ${{ secrets.ADMIN }}
       with:
         host: ${{ secrets.HOST }}
         port: ${{ secrets.PORT }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
-        envs: host, admin
         script: |
           docker stop gptishka
-          docker remove $(docker ps -a -q)
+          docker system prune -f
           docker pull metravod/gptishka:latest
-          docker run --env BOT=bot --env ADMIN=admin --name gptishka -d metravod/gptishka:latest
+          docker run --env-file ~/projects/.config/dev_env.list --name gptishka -d metravod/gptishka:latest
