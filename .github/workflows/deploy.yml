@@ -42,9 +42,9 @@ jobs:
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
-        PORT: ${{ secrets.VPS_PORT }}
-        USERNAME: ${{ secrets.VPS_USER }}
-        PASSWORD: ${{ secrets.SSH_PASS }}
+        port: ${{ secrets.PORT }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
         script: |
           docker pull metravod/gptishka:latest
           docker run --name gptishka -d metravod/gptishka:latest
@@ -61,9 +61,9 @@ jobs:
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
-        PORT: ${{ secrets.VPS_PORT }}
-        USERNAME: ${{ secrets.VPS_USER }}
-        PASSWORD: ${{ secrets.SSH_PASS }}
+        port: ${{ secrets.PORT }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
         script: |
           docker pull metravod/gptishka:latest
           docker run --name gptishka -d metravod/gptishka:latest
