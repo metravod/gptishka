@@ -50,6 +50,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         envs: host, admin
         script: |
+          docker stop gptishka
+          docker remove $(docker ps -a -q)
           docker pull metravod/gptishka:latest
           docker run --env BOT=bot --env ADMIN=admin --name gptishka -d metravod/gptishka:latest
 
@@ -73,5 +75,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         envs: host, admin
         script: |
+          docker stop gptishka
+          docker remove $(docker ps -a -q)
           docker pull metravod/gptishka:latest
           docker run --env BOT=bot --env ADMIN=admin --name gptishka -d metravod/gptishka:latest
