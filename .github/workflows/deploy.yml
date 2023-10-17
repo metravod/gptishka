@@ -40,14 +40,18 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run container
       uses: appleboy/ssh-action@master
+      env:
+        bot: ${{ secrets.BOT }}
+        admin: ${{ secrets.ADMIN }}
       with:
         host: ${{ secrets.HOST }}
         port: ${{ secrets.PORT }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
+        envs: host, admin
         script: |
           docker pull metravod/gptishka:latest
-          docker run --name gptishka -d metravod/gptishka:latest
+          docker run --env BOT=bot --env ADMIN=admin --name gptishka -d metravod/gptishka:latest
 
   deployProd:
     name: Deploy to Prod
@@ -59,11 +63,15 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run container
       uses: appleboy/ssh-action@master
+      env:
+        bot: ${{ secrets.BOT }}
+        admin: ${{ secrets.ADMIN }}
       with:
         host: ${{ secrets.HOST }}
         port: ${{ secrets.PORT }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
+        envs: host, admin
         script: |
           docker pull metravod/gptishka:latest
-          docker run --name gptishka -d metravod/gptishka:latest
+          docker run --env BOT=bot --env ADMIN=admin --name gptishka -d metravod/gptishka:latest

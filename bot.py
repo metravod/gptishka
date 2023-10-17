@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 
@@ -9,12 +10,15 @@ from aiogram.dispatcher import FSMContext
 
 from gpt_connector import GPTConnector, define_name_chat
 from database.redis_helper import RedisHelper
-from settings.bot_config import bot_token, admin_id
+# from settings.bot_config import bot_token, admin_id
 from settings.common import base_context, forming_message
 from database import orm
 from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, EXTRACT_CODE, CREATE_GISTS, forming_inline_lists
 from tools.message_formater import MessageFormatter, extracting_code
 from tools.gist_creator import GistCreator
+
+bot_token = os.getenv('BOT')
+admin_id = os.getenv('ADMIN')
 
 bot = Bot(token=bot_token)
 storage = MemoryStorage()
