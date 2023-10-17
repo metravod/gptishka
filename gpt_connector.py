@@ -1,9 +1,12 @@
+import os
 from typing import Tuple
 
 import openai
 
-from settings.common import forming_message
-from settings.gpt_config import GPT_API_KEY, context_for_naming
+from tools.message_formater import forming_message
+
+gpt_token = os.getenv('GPT_API_KEY')
+context_for_naming = os.getenv('CONTEXT_FOR_NAMING')
 
 
 class GPTConnector:
@@ -14,7 +17,7 @@ class GPTConnector:
     def run(self) -> Tuple[str, int]:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k-0613",
-            api_key=GPT_API_KEY,
+            api_key=gpt_token,
             messages=self._talk
         )
         content = response['choices'][0]['message']['content']

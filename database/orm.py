@@ -1,9 +1,10 @@
-from sqlalchemy import create_engine, delete
+import os
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database.models import Base, User, UserContext
 
-from settings.db_config import postgre_url
+postgre_url = os.getenv('POSTGRE_URL')
 
 
 def _create_session():

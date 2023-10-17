@@ -36,3 +36,10 @@ def extracting_code(msg: str) -> str:
         snipets = 'А нет кода то'
     snipets = snipets.replace('$$$n', '\n').replace('$$$\'', '\'')
     return snipets
+
+
+base_context = [{"role": "system", "content": "You are a helpful assistant."}, ]
+
+
+def forming_message(role: str, text: str) -> dict:
+    return {"role": role, "content": text}

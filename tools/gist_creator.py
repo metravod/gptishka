@@ -1,13 +1,15 @@
+import os
 import requests
 import json
 
-from settings.github_config import GITHUB_API_TOKEN, gists_url
+github_token = os.getenv('GITHUB_API_TOKEN')
+gists_url = os.getenv('GISTS_URL')
 
 
 class GistCreator:
 
     def __init__(self, content: str):
-        self._headers = {'Authorization': f'token {GITHUB_API_TOKEN}',
+        self._headers = {'Authorization': f'token {github_token}',
                          'Accept': 'application/vnd.github+json',
                          'X-GitHub-Api-Version': '2022-11-28'}
         self._params = {'scope': 'gist'}
