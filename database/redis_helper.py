@@ -1,7 +1,10 @@
+import os
 import json
 import redis
 
-from settings.db_config import redis_host, redis_port, redis_password
+redis_host = os.getenv('REDIS_HOST')
+redis_port = os.getenv('REDIS_PORT')
+redis_password = os.getenv('REDIS_PASSWORD')
 
 
 class RedisHelper:

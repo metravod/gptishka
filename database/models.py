@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from sqlalchemy import Column, ForeignKey, JSON, ARRAY
@@ -6,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from settings.db_config import postgre_url
+postgre_url = os.getenv('POSTGRE_URL')
 
 
 Base = declarative_base()

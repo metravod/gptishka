@@ -1,9 +1,16 @@
+import os
 from typing import Tuple
 
 import openai
 
-from settings.common import forming_message
-from settings.gpt_config import GPT_API_KEY, context_for_naming
+from tools.message_formater import forming_message
+
+gpt_token = os.getenv('GPT_API_KEY')
+CONTEXT_FOR_NAMING = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Давай поиграем? Я тебе сообщение, а ты мне возвращаешь его основную мысль в три слова?"},
+    {"role": "assistant", "content": "Конечно, давай поиграем! Напиши сообщение, я постараюсь извлечь из него основную мысль в три слова."}
+]
 
 
 class GPTConnector:
@@ -14,7 +21,7 @@ class GPTConnector:
     def run(self) -> Tuple[str, int]:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k-0613",
-            api_key=GPT_API_KEY,
+            api_key=gpt_token,
             messages=self._talk
         )
         content = response['choices'][0]['message']['content']
@@ -23,7 +30,7 @@ class GPTConnector:
 
 
 def define_name_chat(message: str) -> str:
-    chat_for_naming = context_for_naming.copy()
+    chat_for_naming = CONTEXT_FOR_NAMING.copy()
     chat_for_naming.append(forming_message('user', message))
     name_chat, _ = GPTConnector(chat_for_naming).run()
     return name_chat
