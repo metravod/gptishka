@@ -15,7 +15,7 @@ from bot_markup import MAIN_MENU, END_CHAT, ENDED_CHAT, EXTRACT_CODE, CREATE_GIS
 from tools.message_formater import MessageFormatter, extracting_code, base_context, forming_message
 from tools.gist_creator import GistCreator
 
-bot_token = os.getenv('BOT')
+bot_token = os.getenv('BOT_TOKEN')
 admin_id = os.getenv('ADMIN')
 
 bot = Bot(token=bot_token)
