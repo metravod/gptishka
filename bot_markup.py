@@ -10,7 +10,9 @@ MAIN_MENU = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Новый чат - базовый контекст'),
-            KeyboardButton(text='Новый чат - свой контекст'),
+            KeyboardButton(text='Новый чат - свой контекст')
+        ],
+        [
             KeyboardButton(text='Список сохранённых чатов')
         ]
     ],
