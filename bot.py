@@ -46,14 +46,14 @@ async def start_message(message: Message) -> None:
     await message.answer(text, reply_markup=MAIN_MENU)
 
 
-@router.message(F.text.caseFold() == 'Новый чат - базовый контекст')
+@router.message(F.text == 'Новый чат - базовый контекст')
 async def new_base_chat(message: Message, state: FSMContext) -> None:
     await state.set_state(Chat.content)
     cli.set(message.from_user.id, base_context)
     await message.answer(text='Погнали', reply_markup=END_CHAT)
 
 
-@router.message(F.text.caseFold() == 'Новый чат - свой контекст')
+@router.message(F.text == 'Новый чат - свой контекст')
 async def custom_context(message: Message, state: FSMContext) -> None:
     await state.set_state(CustomContext.content)
     await message.answer('Какой контекст задать?')
@@ -67,7 +67,7 @@ async def new_base_chat(message: Message, state: FSMContext) -> None:
     await message.answer(text='Погнали', reply_markup=END_CHAT)
 
 
-@router.message(F.text.caseFold() == 'Список сохранённых чатов')
+@router.message(F.text == 'Список сохранённых чатов')
 async def get_list_contexts(message: Message):
     contexts = orm.get_list_contexts_by_user(message.from_user.id)
     if len(contexts) > 0:
