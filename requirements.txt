@@ -23,7 +23,7 @@ pydantic==2.3.0
 pydantic_core==2.6.3
 pytz==2023.3
 redis==4.5.5
-requests==2.30.0
+requests==2.31.0
 SQLAlchemy==2.0.15
 tqdm==4.65.0
 typing_extensions==4.7.1
