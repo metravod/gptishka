@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
@@ -5,16 +7,24 @@ from aiogram.types import (
     KeyboardButton
 )
 
+
+@dataclass
+class Buttons:
+    base_context = KeyboardButton(text='Новый чат - базовый контекст')
+    custom_context = KeyboardButton(text='Новый чат - свой контекст')
+    list_saved_contexts = KeyboardButton(text='Список сохранённых чатов')
+    save = KeyboardButton(text='Сохранить')
+    delete = KeyboardButton(text='Удалить')
+    end_chat = KeyboardButton(text='Завершить чат')
+    extract_code = KeyboardButton(text='Вытащи код')
+    create_gists = KeyboardButton(text='Создай gists')
+
+
 # Главное меню
 MAIN_MENU = ReplyKeyboardMarkup(
     keyboard=[
-        [
-            KeyboardButton(text='Новый чат - базовый контекст'),
-            KeyboardButton(text='Новый чат - свой контекст')
-        ],
-        [
-            KeyboardButton(text='Список сохранённых чатов')
-        ]
+        [Buttons.base_context, Buttons.custom_context],
+        [Buttons.list_saved_contexts]
     ],
     row_width=2,
     resize_keyboard=True
@@ -22,39 +32,28 @@ MAIN_MENU = ReplyKeyboardMarkup(
 
 # Завершение чата
 ENDED_CHAT = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text='Сохранить'),
-            KeyboardButton(text='Удалить')
-        ]
-    ],
+    keyboard=[[Buttons.save, Buttons.delete]],
     row_width=1,
     resize_keyboard=True
 )
 
 # Завершить чат
 END_CHAT = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text='Завершить чат')]
-    ],
+    keyboard=[[Buttons.end_chat]],
     row_width=1,
     resize_keyboard=True
 )
 
 # Вытащить код
 EXTRACT_CODE = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text='Вытащи код')]
-    ],
+    keyboard=[[Buttons.extract_code], [Buttons.end_chat]],
     row_width=1,
     resize_keyboard=True
 )
 
 # Создать gists
 CREATE_GISTS = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text='Создай gists')]
-    ],
+    keyboard=[[Buttons.create_gists], [Buttons.end_chat]],
     row_width=1,
     resize_keyboard=True
 )
